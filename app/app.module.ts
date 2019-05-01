@@ -9,6 +9,7 @@ import { setStatusBarColors, BackendService, LoginService } from "./shared";
 
 import { LoginModule } from "./login/login.module";
 import { GroceriesModule } from "./groceries/groceries.module";
+import { DatabaseService } from "./shared/sqlite.service";
 
 setStatusBarColors();
 
@@ -16,7 +17,8 @@ setStatusBarColors();
   providers: [
     BackendService,
     LoginService,
-    authProviders
+    authProviders,
+    DatabaseService
   ],
   imports: [
     NativeScriptModule,

@@ -8,6 +8,8 @@ import { prompt } from "ui/dialogs";
 import { Page } from "ui/page";
 
 import { alert, LoginService, User } from "../shared";
+import { setString } from "tns-core-modules/application-settings/application-settings";
+import { RouterExtensions } from "nativescript-angular/router";
 
 @Component({
   selector: "gr-login",
@@ -29,6 +31,7 @@ export class LoginComponent implements OnInit {
 
   constructor(private router: Router,
     private userService: LoginService,
+    private routerExtensions: RouterExtensions,
     private page: Page) {
     this.user = new User();
     // this.page.className = "login-page";
@@ -64,24 +67,31 @@ export class LoginComponent implements OnInit {
   }
 
   login() {
-    if (getConnectionType() === connectionType.none) {
-      alert("Groceries requires an internet connection to log in.");
-      return;
-    }
+    // if (getConnectionType() === connectionType.none) {
+    //   alert("Groceries requires an internet connection to log in.");
+    //   return;
+    // }
 
     this.userService.login(this.user)
       .subscribe(
         () => {
+          setString("user_id", this.user.email);
+          this.routerExtensions.navigate(["/"], { clearHistory: true });
           this.isAuthenticating = false;
           this.router.navigate(["/"]);
         },
         (error) => {
+          this.clearFields();
           alert("Unfortunately we could not find your account.");
           this.isAuthenticating = false;
         }
       );
   }
 
+  clearFields() {
+    this.user.email = "";
+    this.user.password = "";
+   }
   signUp() {
     if (getConnectionType() === connectionType.none) {
       alert("Groceries requires an internet connection to register.");
@@ -94,8 +104,10 @@ export class LoginComponent implements OnInit {
           alert("Your account was successfully created.");
           this.isAuthenticating = false;
           this.toggleDisplay();
+          this.clearFields();
         },
         (errorDetails) => {
+          this.clearFields();
           if (errorDetails.error && errorDetails.error.error === "UserAlreadyExists") {
             alert("This email address is already in use.");
           } else {
